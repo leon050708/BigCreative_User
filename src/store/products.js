@@ -12,6 +12,22 @@ export const useProductStore = defineStore('products', () => {
     const currentProduct = ref(null);
     const isLoading = ref(false);
     const error = ref(null);
+    const isLoadingRecommendations = ref(false); // 用于推荐商品
+    const isLoadingSearch = ref(false);       // 用于搜索结果
+    const isLoadingProductList = ref(false);  // 用于通用产品列表（如果其他地方需要）
+    const isLoadingDetails = ref(false);      // 用于单个产品详情
+
+    async function fetchRecommendedProducts() {
+        isLoadingRecommendations.value = true;
+        // ... api call ...
+        isLoadingRecommendations.value = false;
+    }
+
+    async function searchProducts(searchTerm) {
+        isLoadingSearch.value = true;
+        // ... api call ...
+        isLoadingSearch.value = false;
+    }
 
     async function fetchAndSetProducts(apiCall, targetRef, errorMessagePrefix) {
         isLoading.value = true;
@@ -70,6 +86,7 @@ export const useProductStore = defineStore('products', () => {
         products, categories, recommendedProducts, currentCategoryProducts,
         searchResults, currentProduct, isLoading, error,
         fetchProducts, fetchRecommendedProducts, fetchCategories,
-        fetchProductsByCategory, searchProducts, fetchProductById
+        fetchProductsByCategory, searchProducts, fetchProductById,isLoadingRecommendations,
+        isLoadingSearch
     };
 });
