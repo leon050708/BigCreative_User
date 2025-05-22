@@ -1,0 +1,297 @@
+/* src/assets/main.css */
+
+/* CSS Variables (自定义属性) - 方便统一修改主题色等 */
+:root {
+    --primary-color: #3498db; /* 主题蓝 */
+    --secondary-color: #2ecc71; /* 绿色，例如用于成功按钮 */
+    --danger-color: #e74c3c;   /* 红色，例如用于错误或删除按钮 */
+    --light-color: #ecf0f1;   /* 浅色背景/边框 */
+    --dark-color: #2c3e50;    /* 深色文字/背景 */
+    --text-color: #333;
+    --link-color: var(--primary-color);
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --border-radius: 6px;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --spacing-unit: 8px; /* 基础间距单位 */
+}
+
+/* Global Resets & Base Styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px; /* Base font size */
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #f4f7f9; /* 更柔和的背景色 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* App Container & Main Content (可以覆盖或增强 App.vue 中的样式) */
+#app-container { /* App.vue 中的根元素ID (如果用了的话) */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content { /* App.vue 中 <main> 的类名 */
+    flex-grow: 1;
+    padding: calc(var(--spacing-unit) * 3); /* 24px */
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.app-footer { /* App.vue 中 <footer> 的类名 */
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 2) 0; /* 16px */
+    font-size: 0.9em;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: calc(var(--spacing-unit) * 1.5); /* 12px */
+    color: var(--dark-color);
+    line-height: 1.3;
+    font-weight: 600;
+}
+
+h1 { font-size: 2.25rem; } /* 36px */
+h2 { font-size: 1.75rem; } /* 28px */
+h3 { font-size: 1.375rem; } /* 22px */
+p { margin-bottom: var(--spacing-unit); } /* 8px */
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+a:hover {
+    color: color-mix(in srgb, var(--link-color) 70%, black);
+    text-decoration: underline;
+}
+
+/* Forms & Buttons */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+    display: block;
+    width: 100%;
+    padding: calc(var(--spacing-unit) * 1.25) var(--spacing-unit); /* 10px 8px */
+    margin-bottom: var(--spacing-unit);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+    border-color: color-mix(in srgb, var(--primary-color) 80%, white);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5); /* 6px 12px */
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--primary-color) 80%, black);
+}
+
+.btn-secondary {
+    color: #fff;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--secondary-color) 80%, black);
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+.btn-danger:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--danger-color) 85%, black);
+    border-color: color-mix(in srgb, var(--danger-color) 80%, black);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-outline-primary:hover:not(:disabled) {
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Navbar Specifics (你可以保留 Navbar.vue 中的 scoped styles，或者在这里提供更全局的默认样式) */
+.navbar { /* 如果 Navbar.vue 中的 <nav> 有这个类名 */
+    background-color: var(--dark-color); /* 与页脚一致的深色 */
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 3); /* 8px 24px */
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.navbar .navbar-brand {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+.navbar .nav-link {
+    color: var(--light-color); /* 浅色链接 */
+    margin-left: calc(var(--spacing-unit) * 2); /* 16px */
+    font-size: 1.1rem;
+}
+.navbar .nav-link:hover,
+.navbar .nav-link.router-link-exact-active {
+    color: white;
+    text-decoration: none; /* 移除下划线，通过颜色区分 */
+}
+.navbar .cart-count {
+    background-color: var(--primary-color); /* 主题蓝 */
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    margin-left: 4px;
+}
+
+/* Product Grid (通用产品列表样式) */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: calc(var(--spacing-unit) * 2.5); /* 20px */
+    margin-top: calc(var(--spacing-unit) * 2); /* 16px */
+}
+
+/* Card Base (通用卡片样式 - ProductCard, OrderCard 等可以基于此扩展) */
+.card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: calc(var(--spacing-unit) * 2); /* 16px */
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.card h3 {
+    margin-top: 0;
+    font-size: 1.25rem; /* 20px */
+}
+
+/* Loading, Error, Empty States */
+.loading-state, .error-state, .empty-state {
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 2); /* 32px 16px */
+    color: #6c757d;
+    font-size: 1.1em;
+    border: 1px dashed var(--light-color);
+    border-radius: var(--border-radius);
+    background-color: #f8f9fa;
+}
+.error-state {
+    color: var(--danger-color);
+    background-color: color-mix(in srgb, var(--danger-color) 10%, white);
+    border-color: color-mix(in srgb, var(--danger-color) 30%, white);
+}
+
+/* Utility Classes (可选) */
+.text-center { text-align: center; }
+.mb-1 { margin-bottom: var(--spacing-unit); }      /* 8px */
+.mb-2 { margin-bottom: calc(var(--spacing-unit) * 2); } /* 16px */
+.mt-1 { margin-top: var(--spacing-unit); }         /* 8px */
+.mt-2 { margin-top: calc(var(--spacing-unit) * 2); }    /* 16px */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        padding: calc(var(--spacing-unit) * 2); /* 16px */
+    }
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--spacing-unit); /* 8px */
+    }
+    h1 { font-size: 2rem; } /* 32px */
+    h2 { font-size: 1.5rem; } /* 24px */
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .navbar-links {
+        margin-top: var(--spacing-unit);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .navbar .nav-link {
+        margin-left: 0;
+        padding: calc(var(--spacing-unit) * 0.5) 0; /* 4px */
+    }
+    .navbar .search-bar-in-nav { /* 假设 Navbar.vue 中的 SearchBar 有这个类 */
+        width: 100%;
+        margin-top: var(--spacing-unit);
+    }
+}
+
+@media (max-width: 576px) {
+    .product-grid {
+        grid-template-columns: 1fr; /* 单列显示 */
+    }
+}

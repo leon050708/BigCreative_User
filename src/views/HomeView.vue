@@ -1,9 +1,10 @@
 <template>
   <div class="home-view">
     <div class="hero-section">
+      <SearchBar @search="handleSearch" class="home-search-bar" />
+      <br>
       <h1>欢迎来到商城</h1>
-      <p>发现最新、最棒的商品</p>
-<!--      <SearchBar @search="handleSearch" class="home-search-bar" />-->
+      <CategoryList />
     </div>
 
     <section class="recommendations" v-if="productStore.recommendedProducts.length && !productStore.isLoading">
@@ -19,9 +20,6 @@
     <div v-else-if="productStore.isLoading" class="loading-state">正在加载推荐商品...</div>
 
     <div class="main-content-area">
-      <aside class="sidebar">
-        <CategoryList />
-      </aside>
       <section class="all-products">
         <h2>
           {{ currentTitle }}

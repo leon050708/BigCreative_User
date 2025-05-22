@@ -1,7 +1,6 @@
 <template>
   <nav class="navbar">
     <router-link to="/" class="navbar-brand">Vue Shop</router-link>
-    <SearchBar @search="handleSearch" class="search-bar-in-nav" />
     <div class="navbar-links">
       <router-link to="/" class="nav-link">首页</router-link>
       <router-link to="/my-orders" class="nav-link">我的订单</router-link> <router-link to="/cart" class="nav-link">
@@ -15,20 +14,9 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import { useCartStore } from '@/store/cart';
-import SearchBar from './SearchBar.vue';
 
-const router = useRouter();
 const cartStore = useCartStore();
-
-const handleSearch = (searchTerm) => {
-  if (searchTerm.trim()) {
-    router.push({ name: 'Search', query: { q: searchTerm } });
-  } else {
-    router.push('/');
-  }
-};
 </script>
 
 <style scoped>
