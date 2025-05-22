@@ -1,9 +1,9 @@
 <template>
   <div class="home-view">
     <div class="hero-section">
-      <h1>欢迎来到 Vue 商城</h1>
+      <h1>欢迎来到商城</h1>
       <p>发现最新、最棒的商品</p>
-      <SearchBar @search="handleSearch" class="home-search-bar" />
+<!--      <SearchBar @search="handleSearch" class="home-search-bar" />-->
     </div>
 
     <section class="recommendations" v-if="productStore.recommendedProducts.length && !productStore.isLoading">

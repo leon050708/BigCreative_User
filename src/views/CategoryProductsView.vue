@@ -1,7 +1,7 @@
 <template>
   <div class="category-products-view">
-    <h2 v-if="categoryName">属于 “{{ categoryName }}” 分类的商品</h2>
-    <h2 v-else>分类商品</h2>
+<!--    <h2 v-if="categoryName">属于 “{{ categoryName }}” 分类的商品</h2>-->
+<!--    <h2 v-else>分类商品</h2>-->
 
     <div v-if="productStore.isLoading" class="loading-state">正在加载商品...</div>
     <div v-else-if="productStore.error" class="error-state">{{ productStore.error }}</div>
