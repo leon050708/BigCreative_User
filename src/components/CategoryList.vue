@@ -1,6 +1,5 @@
 <template>
-  <div class="category-section">
-    <h3>商品分类</h3>
+  <div class="category-section-inner"> <h3>商品分类</h3>
     <div v-if="productStore.isLoading" class="loading-state">正在加载分类...</div>
     <div v-else-if="productStore.error" class="error-state">{{ productStore.error }}</div>
     <div v-else-if="productStore.categories.length" class="category-grid">
@@ -29,97 +28,100 @@ import { useProductStore } from '@/store/products';
 import { onMounted, ref } from 'vue';
 
 const productStore = useProductStore();
-// 提供一个备用图片，以防 category.imageUrl 加载失败或为空
-const defaultCategoryImage = ref('https://via.placeholder.com/100x100/cccccc/000000?text=N/A');
+const defaultCategoryImage = ref('https://th.bing.com/th/id/R.96d68d283e87b2a93dd88da383716d7a?rik=%2fyTvHniN%2bmXaPw&pid=ImgRaw&r=0&sres=1&sresct=1'); // 使用用户提供的图片
 
 onMounted(() => {
-  if (!productStore.categories.length || productStore.categories.some(cat => !cat.imageUrl)) { // 如果分类为空或某些分类缺少图片URL，则重新获取
+  if (!productStore.categories.length || productStore.categories.some(cat => !cat.imageUrl)) {
     productStore.fetchCategories();
   }
 });
 
-// 图片加载失败时的处理函数
 const onImageError = (event) => {
-  event.target.src = defaultCategoryImage.value; // 加载失败则显示备用图片
+  event.target.src = defaultCategoryImage.value;
 };
 </script>
 
 <style scoped>
-.category-section {
-  background-color: #fff;
-  padding: 20px; /* 增加内边距 */
-  border-radius: var(--border-radius, 8px);
-  box-shadow: var(--box-shadow, 0 2px 8px rgba(0,0,0,0.1));
-  margin-bottom: calc(var(--spacing-unit, 8px) * 3); /* 与其他部分的间距 */
+.category-section-inner {
+  padding-top: calc(var(--spacing-unit, 8px) * 2); /* 与上方元素的间距 */
+  /* background-color: var(--white-color, #fff); /* 此区块不再需要独立背景，它在hero-section内 */
+  /* border-radius: var(--border-radius, 8px); */
+  /* box-shadow: var(--box-shadow, 0 2px 8px rgba(0,0,0,0.1)); */
 }
 
-.category-section h3 {
+.category-section-inner h3 {
   margin-top: 0;
-  margin-bottom: calc(var(--spacing-unit, 8px) * 2); /* 16px */
-  color: var(--dark-color, #333);
-  text-align: center; /* 标题居中 */
-  font-size: 1.5rem; /* 调整标题大小 */
-  border-bottom: none; /* 移除之前的下划线 */
+  margin-bottom: calc(var(--spacing-unit, 8px) * 2.5); /* 20px */
+  color: var(--dark-color, #333); /* 分类标题用深色文字 */
+  text-align: center;
+  font-size: 1.4rem; /* 调整标题大小 */
+  font-weight: 600;
 }
 
 .category-grid {
   display: grid;
-  /* 根据您希望每行显示多少个来调整，这里是自适应数量 */
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: calc(var(--spacing-unit, 8px) * 2); /* 卡片间距 16px */
-  padding-top: var(--spacing-unit, 8px); /* 顶部留出一些空间 */
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); /* 卡片更小，以便在一行容纳更多 */
+  gap: calc(var(--spacing-unit, 8px) * 1.5); /* 卡片间距 12px */
 }
 
 .category-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: calc(var(--spacing-unit, 8px) * 1.5); /* 12px */
+  justify-content: flex-start; /* 顶部对齐 */
+  padding: var(--spacing-unit, 8px); /* 减小内边距 */
   text-decoration: none;
-  color: var(--text-color, #333);
+  color: var(--text-color-light, #555);
   border-radius: var(--border-radius, 8px);
-  background-color: #f8f9fa; /* 卡片背景色 */
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background-color: transparent; /* 卡片背景透明，融入hero-section背景 */
+  /* border: 1px solid var(--border-color, #eee); 可选的细边框 */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease;
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  color: var(--primary-color, #3498db);
+  transform: translateY(-3px);
+  background-color: color-mix(in srgb, var(--primary-color, #6b2248) 8%, var(--white-color, #fff)); /* 主色调的浅色背景 */
+  color: var(--primary-color, #6b2248);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .category-image {
-  width: 60px; /* 根据图标大小调整 */
-  height: 60px; /* 根据图标大小调整 */
-  object-fit: cover; /* 或 contain，取决于您的图片类型 */
-  margin-bottom: calc(var(--spacing-unit, 8px) * 1); /* 图片和文字间距 8px */
-  border-radius: 50%; /* 如果想要圆形图片/图标背景 */
-  background-color: #fff; /* 给图片一个白色背景，如果图片本身是透明的 */
-  padding: 5px; /* 如果图片本身没有留白，可以加一点内边距 */
-  box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  width: 50px; /* 减小图标/图片尺寸 */
+  height: 50px;
+  object-fit: cover;
+  margin-bottom: calc(var(--spacing-unit, 8px) * 0.75); /* 6px */
+  border-radius: 50%; /* 圆形图片 */
+  background-color: var(--light-color, #f4f9f9); /* 给图片一个非常浅的背景 */
+  padding: 4px; /* 轻微内边距，如果图片本身没有留白 */
+  /* box-shadow: 0 1px 2px rgba(0,0,0,0.05); */ /* 可以移除或保留 */
+  border: 1px solid var(--border-color, #e0e0e0); /* 给图片一个细边框 */
 }
 
 .category-name {
-  font-size: 0.9rem; /* 调整文字大小 */
+  font-size: 0.8rem; /* 减小分类名称字体 */
   text-align: center;
-  /* 防止文字过长换行影响布局 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%; /* 确保文字在卡片内 */
+  max-width: 100%;
+  line-height: 1.3; /* 调整行高 */
 }
 
-/* 加载、错误、空状态的样式 (如果需要，可以从全局CSS继承或自定义) */
-.loading-state, .error-state, .empty-state {
-  text-align: center;
-  padding: 20px;
-  color: #7f8c8d;
-  font-size: 1.1em;
-  margin-top: 10px;
-}
-.error-state {
-  color: var(--danger-color, #e74c3c);
+/* 响应式调整 CategoryList 内部的网格 */
+@media (max-width: 576px) {
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* 移动端更小的分类卡片 */
+    gap: var(--spacing-unit, 8px);
+  }
+  .category-section-inner h3 {
+    font-size: 1.2rem;
+  }
+  .category-image {
+    width: 40px;
+    height: 40px;
+  }
+  .category-name {
+    font-size: 0.75rem;
+  }
 }
 </style>

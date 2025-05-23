@@ -70,7 +70,7 @@ const getStatusText = (status) => {
 
 <style scoped>
 .my-orders-view {
-  max-width: 900px;
+  max-width: 1920px;
   margin: 20px auto;
   padding: 20px;
   background-color: #fff;
