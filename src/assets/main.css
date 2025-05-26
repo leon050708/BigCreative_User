@@ -1,19 +1,44 @@
 /* src/assets/main.css */
 
-/* CSS Variables (自定义属性) - 方便统一修改主题色等 */
 :root {
-    --primary-color: #3498db; /* 主题蓝 */
-    --secondary-color: #2ecc71; /* 绿色，例如用于成功按钮 */
-    --danger-color: #e74c3c;   /* 红色，例如用于错误或删除按钮 */
-    --light-color: #ecf0f1;   /* 浅色背景/边框 */
-    --dark-color: #2c3e50;    /* 深色文字/背景 */
-    --text-color: #333;
+    /* --- Color Palette (ensure good contrast) --- */
+    --primary-color: #6b2248;   /* Deep magenta/purple - Main color */
+    --primary-color-darker: #521a36; /* For hover/active states */
+    --primary-color-light: #fdf4f8; /* Lighter shade for backgrounds/accents if needed */
+    --secondary-color: #7c7dbf; /* Soft lavender/blue - Secondary color */
+    --secondary-color-darker: #5f609a; /* For hover/active states */
+
+    --danger-color: #e74c3c;
+    --danger-color-darker: #c0392b;
+    --warning-color: #f39c12;
+    --success-color: #2ecc71;
+    --success-color-darker: #27ae60;
+
+    --light-color: #f4f7f9;     /* Lighter gray background/borders */
+    --white-color: #ffffff;
+    --dark-color: #2c3e50;      /* Deep blue-gray text/backgrounds */
+    --text-color: #34495e;      /* Main text color (slightly softer than pure black) */
+    --text-color-light: #7f8c8d; /* Lighter text color */
+    --border-color: #dde4e9;    /* Softer border color */
+
+    --spacing-unit: 8px;
+
     --link-color: var(--primary-color);
+    --link-hover-color: var(--primary-color-darker);
+
+    /* --- Typography --- */
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --line-height-base: 1.6;
+    --line-height-heading: 1.3;
+
+    /* --- Borders & Shadows --- */
     --border-radius: 6px;
-    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --spacing-unit: 8px; /* 基础间距单位 */
+    --border-radius-large: 12px; /* Consistent larger radius */
+    --box-shadow: 0 2px 10px rgba(44, 62, 80, 0.08); /* Slightly softer, more spread out */
+    --box-shadow-light: 0 1px 4px rgba(44, 62, 80, 0.06);
+    --box-shadow-hover: 0 5px 15px rgba(44, 62, 80, 0.12);
+    --focus-ring-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 25%, transparent);
 }
 
 /* Global Resets & Base Styles */
@@ -26,54 +51,61 @@
 }
 
 html {
-    font-size: 16px; /* Base font size */
+    font-size: 16px;
     scroll-behavior: smooth;
 }
 
 body {
     font-family: var(--font-family-sans-serif);
-    line-height: 1.6;
+    line-height: var(--line-height-base);
     color: var(--text-color);
-    background-color: #f4f7f9; /* 更柔和的背景色 */
+    background-color: var(--light-color);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* App Container & Main Content (可以覆盖或增强 App.vue 中的样式) */
-#app-container { /* App.vue 中的根元素ID (如果用了的话) */
+/* App Container & Main Content */
+#app-container { /* Assuming you have an #app-container or similar wrapper inside #app if needed */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-.main-content { /* App.vue 中 <main> 的类名 */
+.main-content {
     flex-grow: 1;
-    padding: calc(var(--spacing-unit) * 3); /* 24px */
-    max-width: 1200px;
+    padding: calc(var(--spacing-unit) * 4); /* Increased padding for more breathing room */
+    max-width: 1920px; /* Or your preferred max width */
     margin: 0 auto;
     width: 100%;
 }
 
-.app-footer { /* App.vue 中 <footer> 的类名 */
+.app-footer {
     background-color: var(--dark-color);
-    color: var(--light-color);
+    color: #bdc3c7;
     text-align: center;
-    padding: calc(var(--spacing-unit) * 2) 0; /* 16px */
+    padding: calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 2); /* Adjusted padding */
     font-size: 0.9em;
+    margin-top: auto; /* Pushes footer to the bottom if content is short */
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-    margin-bottom: calc(var(--spacing-unit) * 1.5); /* 12px */
+    margin-bottom: calc(var(--spacing-unit) * 2); /* Consistent bottom margin */
     color: var(--dark-color);
-    line-height: 1.3;
+    line-height: var(--line-height-heading);
     font-weight: 600;
 }
 
-h1 { font-size: 2.25rem; } /* 36px */
-h2 { font-size: 1.75rem; } /* 28px */
-h3 { font-size: 1.375rem; } /* 22px */
-p { margin-bottom: var(--spacing-unit); } /* 8px */
+h1 { font-size: 2.25rem; } /* Example: 36px */
+h2 { font-size: 1.875rem; } /* Example: 30px */
+h3 { font-size: 1.5rem; }   /* Example: 24px */
+h4 { font-size: 1.25rem; } /* Example: 20px */
+h5 { font-size: 1rem; }    /* Example: 16px */
+h6 { font-size: 0.875rem; }/* Example: 14px */
+
+p {
+    margin-bottom: calc(var(--spacing-unit) * 1.5); /* Slightly more space after paragraphs */
+}
 
 a {
     color: var(--link-color);
@@ -81,7 +113,7 @@ a {
     transition: color 0.2s ease-in-out;
 }
 a:hover {
-    color: color-mix(in srgb, var(--link-color) 70%, black);
+    color: var(--link-hover-color);
     text-decoration: underline;
 }
 
@@ -95,17 +127,18 @@ textarea,
 select {
     display: block;
     width: 100%;
-    padding: calc(var(--spacing-unit) * 1.25) var(--spacing-unit); /* 10px 8px */
-    margin-bottom: var(--spacing-unit);
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.5); /* Adjusted padding */
+    margin-bottom: calc(var(--spacing-unit) * 1.5); /* Consistent margin */
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: var(--line-height-base);
     color: var(--text-color);
-    background-color: #fff;
+    background-color: var(--white-color);
     background-clip: padding-box;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
@@ -113,59 +146,76 @@ input[type="number"]:focus,
 input[type="search"]:focus,
 textarea:focus,
 select:focus {
-    border-color: color-mix(in srgb, var(--primary-color) 80%, white);
+    border-color: var(--primary-color);
     outline: 0;
-    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 25%, transparent);
+    box-shadow: var(--focus-ring-shadow);
 }
 
 .btn {
     display: inline-block;
-    font-weight: 400;
+    font-weight: 500; /* Slightly bolder */
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
     background-color: transparent;
     border: 1px solid transparent;
-    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5); /* 6px 12px */
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 2.5); /* More generous padding */
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.5; /* Keep as is or match base */
     border-radius: var(--border-radius);
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.1s ease-in-out;
 }
-.btn:disabled {
+.btn:disabled,
+.btn.disabled { /* Add .disabled class for non-form elements */
     opacity: 0.65;
     cursor: not-allowed;
+    box-shadow: none;
+}
+.btn:not(:disabled):active {
+    transform: translateY(1px); /* Subtle press effect */
+    box-shadow: var(--box-shadow-light); /* or a subtle inset shadow */
 }
 
+
 .btn-primary {
-    color: #fff;
+    color: var(--white-color);
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
 .btn-primary:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--primary-color) 85%, black);
-    border-color: color-mix(in srgb, var(--primary-color) 80%, black);
+    background-color: var(--primary-color-darker);
+    border-color: var(--primary-color-darker);
+}
+.btn-primary:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--primary-color-darker) 90%, black);
 }
 
+
 .btn-secondary {
-    color: #fff;
+    color: var(--white-color);
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
 }
 .btn-secondary:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
-    border-color: color-mix(in srgb, var(--secondary-color) 80%, black);
+    background-color: var(--secondary-color-darker);
+    border-color: var(--secondary-color-darker);
+}
+.btn-secondary:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--secondary-color-darker) 90%, black);
 }
 
 .btn-danger {
-    color: #fff;
+    color: var(--white-color);
     background-color: var(--danger-color);
     border-color: var(--danger-color);
 }
 .btn-danger:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--danger-color) 85%, black);
-    border-color: color-mix(in srgb, var(--danger-color) 80%, black);
+    background-color: var(--danger-color-darker);
+    border-color: var(--danger-color-darker);
+}
+.btn-danger:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--danger-color-darker) 90%, black);
 }
 
 .btn-outline-primary {
@@ -173,125 +223,196 @@ select:focus {
     border-color: var(--primary-color);
 }
 .btn-outline-primary:hover:not(:disabled) {
-    color: #fff;
+    color: var(--white-color);
     background-color: var(--primary-color);
-    border-color: var(--primary-color);
 }
 
-/* Navbar Specifics (你可以保留 Navbar.vue 中的 scoped styles，或者在这里提供更全局的默认样式) */
-.navbar { /* 如果 Navbar.vue 中的 <nav> 有这个类名 */
-    background-color: var(--dark-color); /* 与页脚一致的深色 */
-    padding: var(--spacing-unit) calc(var(--spacing-unit) * 3); /* 8px 24px */
-    color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.btn-outline-secondary {
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+.btn-outline-secondary:hover:not(:disabled) {
+    color: var(--white-color);
+    background-color: var(--secondary-color);
+}
+
+
+/* Navbar Specifics */
+.navbar {
+    background-color: var(--dark-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3); /* Adjusted padding */
+    color: var(--white-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Slightly stronger shadow for navbar */
+    display: flex; /* For better alignment of nav items */
+    justify-content: space-between;
+    align-items: center;
 }
 .navbar .navbar-brand {
-    color: white;
+    color: var(--white-color);
     font-size: 1.75rem;
     font-weight: bold;
+    text-decoration: none;
+}
+.navbar .nav-links { /* Create a container for nav links */
+    display: flex;
+    align-items: center;
 }
 .navbar .nav-link {
-    color: var(--light-color); /* 浅色链接 */
-    margin-left: calc(var(--spacing-unit) * 2); /* 16px */
+    color: #e0e0e0;
+    margin-left: calc(var(--spacing-unit) * 2.5); /* Increased margin */
     font-size: 1.1rem;
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit)); /* Add some padding */
+    border-radius: var(--border-radius);
+    position: relative; /* For potential active indicator */
+    text-decoration: none;
 }
 .navbar .nav-link:hover,
 .navbar .nav-link.router-link-exact-active {
-    color: white;
-    text-decoration: none; /* 移除下划线，通过颜色区分 */
+    color: var(--white-color);
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle background for active/hover */
 }
-.navbar .cart-count {
-    background-color: var(--primary-color); /* 主题蓝 */
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-size: 0.8em;
-    margin-left: 4px;
+/* More prominent active link (optional) */
+.navbar .nav-link.router-link-exact-active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; /* Adjust as needed */
+    left: var(--spacing-unit);
+    right: var(--spacing-unit);
+    height: 2px;
+    background-color: var(--primary-color); /* Or var(--white-color) */
 }
 
-/* Product Grid (通用产品列表样式) */
+.navbar .cart-count {
+    background-color: var(--primary-color);
+    color: var(--white-color); /* Ensure text is readable */
+    padding: 3px 8px; /* Slightly more padding */
+    border-radius: var(--border-radius-large); /* Make it more pill-shaped */
+    font-size: 0.8em;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
+/* Product Grid */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: calc(var(--spacing-unit) * 2.5); /* 20px */
-    margin-top: calc(var(--spacing-unit) * 2); /* 16px */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Slightly wider min for items */
+    gap: calc(var(--spacing-unit) * 3); /* Increased gap */
+    margin-top: calc(var(--spacing-unit) * 3);
 }
 
-/* Card Base (通用卡片样式 - ProductCard, OrderCard 等可以基于此扩展) */
+/* Card Base */
 .card {
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: var(--border-radius);
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-large); /* Use larger radius for cards */
     box-shadow: var(--box-shadow);
-    padding: calc(var(--spacing-unit) * 2); /* 16px */
-    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+    padding: calc(var(--spacing-unit) * 2.5); /* Increased padding */
+    transition: box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
+    display: flex; /* For better internal layout if needed */
+    flex-direction: column;
 }
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px); /* Slightly more lift */
+    box-shadow: var(--box-shadow-hover);
 }
 .card h3 {
     margin-top: 0;
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.2rem; /* Adjusted size */
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    color: var(--dark-color);
 }
+.card p {
+    font-size: 0.95rem;
+    color: var(--text-color-light);
+    flex-grow: 1; /* Allows text to take space before button/footer */
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+.card-actions { /* For buttons or links at the bottom of a card */
+    margin-top: auto; /* Pushes actions to the bottom */
+    padding-top: calc(var(--spacing-unit) * 1.5);
+    border-top: 1px solid var(--border-color); /* Optional separator */
+}
+
 
 /* Loading, Error, Empty States */
-.loading-state, .error-state, .empty-state {
+.status-message-container { /* A wrapper for these states */
     text-align: center;
-    padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 2); /* 32px 16px */
-    color: #6c757d;
-    font-size: 1.1em;
-    border: 1px dashed var(--light-color);
-    border-radius: var(--border-radius);
-    background-color: #f8f9fa;
+    padding: calc(var(--spacing-unit) * 5) calc(var(--spacing-unit) * 3);
+    margin-top: calc(var(--spacing-unit) * 3);
+    border-radius: var(--border-radius-large);
+    border: 1px dashed var(--border-color);
+    background-color: color-mix(in srgb, var(--light-color) 70%, var(--white-color));
 }
-.error-state {
-    color: var(--danger-color);
-    background-color: color-mix(in srgb, var(--danger-color) 10%, white);
-    border-color: color-mix(in srgb, var(--danger-color) 30%, white);
+.status-message-container .icon { /* Placeholder for icon styling */
+    font-size: 3rem; /* Example size */
+    margin-bottom: var(--spacing-unit);
+    display: block;
 }
 
-/* Utility Classes (可选) */
+.loading-state {
+    color: var(--text-color);
+}
+.loading-state .icon { /* Example: color: var(--primary-color); */ }
+
+.empty-state {
+    color: var(--text-color-light);
+}
+.empty-state .icon { /* Example: color: var(--text-color-light); */ }
+
+
+.error-state {
+    color: var(--danger-color);
+    background-color: color-mix(in srgb, var(--danger-color) 8%, var(--white-color));
+    border-color: color-mix(in srgb, var(--danger-color) 40%, transparent);
+}
+.error-state .icon {
+    color: var(--danger-color);
+}
+.error-state p {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+
+/* Utility Classes (Add as needed) */
 .text-center { text-align: center; }
-.mb-1 { margin-bottom: var(--spacing-unit); }      /* 8px */
-.mb-2 { margin-bottom: calc(var(--spacing-unit) * 2); } /* 16px */
-.mt-1 { margin-top: var(--spacing-unit); }         /* 8px */
-.mt-2 { margin-top: calc(var(--spacing-unit) * 2); }    /* 16px */
+.mt-1 { margin-top: var(--spacing-unit); }
+.mt-2 { margin-top: calc(var(--spacing-unit) * 2); }
+/* ... more utilities ... */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .main-content {
-        padding: calc(var(--spacing-unit) * 2); /* 16px */
+        padding: calc(var(--spacing-unit) * 3);
     }
     .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: var(--spacing-unit); /* 8px */
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: calc(var(--spacing-unit) * 2);
     }
-    h1 { font-size: 2rem; } /* 32px */
-    h2 { font-size: 1.5rem; } /* 24px */
-
     .navbar {
-        flex-direction: column;
-        align-items: flex-start;
+        padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+        /* Add styles for hamburger menu toggle here */
     }
-    .navbar-links {
-        margin-top: var(--spacing-unit);
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+    .navbar .nav-links {
+        /* Styles for when menu is collapsed (e.g., display: none or flex-direction: column) */
     }
-    .navbar .nav-link {
-        margin-left: 0;
-        padding: calc(var(--spacing-unit) * 0.5) 0; /* 4px */
-    }
-    .navbar .search-bar-in-nav { /* 假设 Navbar.vue 中的 SearchBar 有这个类 */
-        width: 100%;
-        margin-top: var(--spacing-unit);
-    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 480px) {
+    .main-content {
+        padding: calc(var(--spacing-unit) * 2);
+    }
     .product-grid {
-        grid-template-columns: 1fr; /* 单列显示 */
+        grid-template-columns: 1fr; /* Single column on very small screens */
+        gap: calc(var(--spacing-unit) * 2);
+    }
+    .btn { /* Make buttons full width on small screens if desired for main CTAs */
+        /* width: 100%; */
+        /* display: block; */
+        /* margin-bottom: var(--spacing-unit); */
+    }
+    .btn:last-child {
+        /* margin-bottom: 0; */
     }
 }

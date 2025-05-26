@@ -34,5 +34,8 @@ export default {
     },
     getOrders() {
         return apiClient.get('/orders');
+    },
+    getOrderById(id) {
+        return apiClient.get(`/orders/${id}`);
     }
 };

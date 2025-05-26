@@ -1,296 +1,193 @@
 <template>
-  <div class="cart-view">
-    <h2>我的购物车</h2>
-    <div v-if="cartStore.items.length === 0" class="empty-cart">
-      <p>您的购物车是空的。</p>
-      <router-link to="/" class="shop-now-btn">马上去购物</router-link>
-    </div>
-    <div v-else>
-      <div class="cart-items">
-        <div v-for="item in cartStore.items" :key="item.product.id" class="cart-item">
-          <img :src="item.product.imageUrl" :alt="item.product.name" class="item-image" />
-          <div class="item-details">
-            <h3 class="item-name">{{ item.product.name }}</h3>
-            <p class="item-price">单价: ¥{{ item.product.price.toFixed(2) }}</p>
-            <div class="item-quantity">
-              <label :for="`quantity-${item.product.id}`">数量:</label>
-              <input
-                  type="number"
-                  :id="`quantity-${item.product.id}`"
-                  :value="item.quantity"
-                  @input="updateItemQuantity(item.product.id, $event.target.value)"
-                  min="1"
-                  :max="item.product.stock"
-                  class="quantity-input"
-              />
-              <span class="item-stock">(库存: {{ item.product.stock }})</span>
-            </div>
-            <p class="item-subtotal">小计: ¥{{ (item.product.price * item.quantity).toFixed(2) }}</p>
-          </div>
-          <button @click="cartStore.removeItem(item.product.id)" class="remove-item-btn">移除</button>
-        </div>
+  <div class="view-container cart-view">
+    <header class="view-header">
+      <h1>我的购物车</h1>
+      <p v-if="cartStore.cartItemCount > 0" class="subtitle">共 {{ cartStore.cartItemCount }} 件商品</p>
+    </header>
+
+    <section class="main-view-content">
+      <div v-if="cartStore.items.length === 0" class="status-message-container empty-state">
+        <p>购物车还是空的哦，快去挑选喜爱的商品吧！</p>
+        <router-link to="/" class="btn btn-primary mt-2">去逛逛</router-link>
       </div>
 
-      <div class="cart-summary">
-        <p class="total-items">总计 {{ cartStore.cartItemCount }} 件商品</p>
-        <p class="total-price">总金额: ¥{{ cartStore.cartTotalPrice }}</p>
-        <button @click="handleCheckout" class="checkout-btn" :disabled="isProcessingOrder">
-          {{ isProcessingOrder ? '正在处理...' : '去结算' }}
-        </button>
-        <button @click="cartStore.clearCart()" class="clear-cart-btn" :disabled="isProcessingOrder">清空购物车</button>
+      <div v-else>
+        <div class="cart-items-list">
+          <div v-for="item in cartStore.items" :key="item.product.id" class="cart-item card">
+            <img :src="item.product.imageUrl || '/placeholder-image.png'" :alt="item.product.name" class="cart-item-image">
+            <div class="cart-item-details">
+              <h3>{{ item.product.name }}</h3>
+              <p class="price">单价: ¥{{ item.product.price.toFixed(2) }}</p>
+              <div class="quantity-controls">
+                <button @click="updateQty(item.product.id, item.quantity - 1)" class="btn btn-outline-secondary btn-sm">-</button>
+                <input type="number" :value="item.quantity" @change="updateQty(item.product.id, parseInt($event.target.value))" min="1" :max="item.product.stock" class="quantity-input-small">
+                <button @click="updateQty(item.product.id, item.quantity + 1)" class="btn btn-outline-secondary btn-sm">+</button>
+              </div>
+            </div>
+            <div class="cart-item-subtotal">
+              <p>小计: ¥{{ (item.product.price * item.quantity).toFixed(2) }}</p>
+              <button @click="cartStore.removeItem(item.product.id)" class="btn btn-danger btn-sm btn-remove">移除</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cart-summary card">
+          <h2>订单总计</h2>
+          <p>商品总数: {{ cartStore.cartItemCount }}</p>
+          <p class="total-price">总金额: <strong>¥{{ cartStore.cartTotalPrice }}</strong></p>
+          <div class="cart-actions">
+            <button @click="cartStore.clearCart()" class="btn btn-outline-danger">清空购物车</button>
+            <button @click="handleCheckout" class="btn btn-success">去结算</button> </div>
+        </div>
       </div>
-      <p v-if="checkoutError" class="checkout-error-message">{{ checkoutError }}</p>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-// ...
-import { ref } from 'vue';
-import { useCartStore } from '@/store/cart';
-import { useOrderStore } from '@/store/order';
 import { useRouter } from 'vue-router';
-// ...
+import { useCartStore } from '@/store/cart'; //
+import { useOrderStore } from '@/store/order'; //
 
 const cartStore = useCartStore();
 const orderStore = useOrderStore();
 const router = useRouter();
-const isProcessingOrder = ref(false);
-const checkoutError = ref(null);
 
+function updateQty(productId, newQuantity) {
+  cartStore.updateQuantity(productId, newQuantity); //
+}
 
-const handleCheckout = async () => {
+async function handleCheckout() {
   if (cartStore.items.length === 0) {
-    alert("购物车是空的！");
+    alert('购物车是空的！');
     return;
   }
-
-  isProcessingOrder.value = true;
-  checkoutError.value = null;
-
-  // 转换购物车项目为后端期望的格式
-  const orderItemsPayload = {
-    items: cartStore.items.map(item => ({
-      productId: item.product.id, // 确保这里的 id 是 Long 类型，或者后端能处理 String
-      quantity: item.quantity
-    }))
-  };
+  const orderItems = cartStore.items.map(item => ({
+    productId: item.product.id,
+    quantity: item.quantity
+  }));
 
   try {
-    const createdOrder = await orderStore.placeOrder(orderItemsPayload);
-    alert(`订单 ${createdOrder.id} 已成功创建！`);
-    cartStore.clearCart();
-    router.push({ name: 'MyOrders' });
+    // 显示加载状态
+    const newOrder = await orderStore.placeOrder({ items: orderItems }); //
+    cartStore.clearCart(); //
+    alert('订单创建成功！'); // 替换为更友好的提示
+    router.push('/my-orders'); //
   } catch (error) {
-    checkoutError.value = `下单失败: ${error.message || '请稍后再试。'}`;
-    console.error("Checkout failed:", error);
-  } finally {
-    isProcessingOrder.value = false;
+    alert(`创建订单失败: ${orderStore.error}`); //
+    // 隐藏加载状态
   }
-};
+}
 </script>
 
 <style scoped>
-/* ... (CartView 样式保持不变，可以添加 checkout-error-message 的样式) ... */
-.cart-view {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-.cart-view h2 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-}
-
-.empty-cart {
-  text-align: center;
-  padding: 30px 0;
-}
-.empty-cart p {
-  font-size: 1.2em;
-  color: #777;
-  margin-bottom: 20px;
-}
-.shop-now-btn {
-  display: inline-block;
-  padding: 12px 25px;
-  background-color: #3498db;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  font-size: 1.1em;
-  transition: background-color 0.3s;
-}
-.shop-now-btn:hover {
-  background-color: #2980b9;
-}
-
-.cart-items {
-  margin-bottom: 30px;
-}
 .cart-item {
   display: flex;
-  align-items: flex-start;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 20px 0;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 2);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  padding: var(--spacing-unit); /* 购物车项卡片内边距 */
 }
-.cart-item:last-child {
-  border-bottom: none;
-}
-.item-image {
+.cart-item-image {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: 4px;
-  margin-right: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
 }
-.item-details {
+.cart-item-details {
   flex-grow: 1;
 }
-.item-name {
-  font-size: 1.3em;
-  color: #333;
-  margin: 0 0 8px 0;
+.cart-item-details h3 {
+  font-size: 1.1rem;
+  margin-bottom: calc(var(--spacing-unit) * 0.5);
 }
-.item-price, .item-subtotal, .item-stock {
-  font-size: 1em;
-  color: #555;
-  margin: 4px 0;
+.cart-item-details .price {
+  color: var(--text-color-light);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-unit);
 }
-.item-subtotal {
-  font-weight: bold;
-}
-.item-stock {
-  font-size: 0.9em;
-  color: #888;
-  margin-left: 5px;
-}
-.item-quantity {
+.quantity-controls {
   display: flex;
   align-items: center;
-  margin: 10px 0;
 }
-.item-quantity label {
-  margin-right: 8px;
-  font-size: 1em;
-}
-.quantity-input {
-  width: 60px;
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.quantity-input-small {
+  width: 50px;
   text-align: center;
-  font-size: 1em;
+  margin: 0 calc(var(--spacing-unit) * 0.5);
+  padding: calc(var(--spacing-unit) * 0.5);
 }
-.quantity-input::-webkit-outer-spin-button,
-.quantity-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.btn-sm { /* 小型按钮样式 */
+  padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit);
+  font-size: 0.8rem;
 }
-.quantity-input[type=number] {
-  -moz-appearance: textfield;
+.cart-item-subtotal {
+  text-align: right;
+  min-width: 120px; /* 确保小计和移除按钮有足够空间 */
 }
-
-.remove-item-btn {
-  background-color: transparent;
-  color: #e74c3c;
-  border: 1px solid #e74c3c;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-  font-size: 0.9em;
-  align-self: center;
+.cart-item-subtotal p {
+  font-weight: 500;
+  margin-bottom: var(--spacing-unit);
 }
-.remove-item-btn:hover {
-  background-color: #e74c3c;
-  color: white;
+.btn-remove {
+  margin-top: var(--spacing-unit);
 }
 
 .cart-summary {
-  border-top: 2px solid #3498db;
-  padding-top: 20px;
-  text-align: right;
+  margin-top: calc(var(--spacing-unit) * 3);
+  padding: calc(var(--spacing-unit) * 2.5);
+  background-color: var(--primary-color-light); /* 用浅主色作为背景 */
 }
-.total-items {
-  font-size: 1.1em;
-  color: #555;
-  margin-bottom: 8px;
+.cart-summary h2 {
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  color: var(--primary-color);
 }
-.total-price {
-  font-size: 1.4em;
+.cart-summary .total-price {
+  font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
+  color: var(--primary-color);
+  margin: var(--spacing-unit) 0 calc(var(--spacing-unit) * 2) 0;
 }
-.checkout-btn, .clear-cart-btn {
-  padding: 12px 25px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1em;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-left: 10px;
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: calc(var(--spacing-unit) * 2);
 }
-.checkout-btn {
-  background-color: #2ecc71;
-  color: white;
+/* 新增成功色按钮 */
+.btn-success {
+  color: var(--white-color);
+  background-color: var(--success-color);
+  border-color: var(--success-color);
 }
-.checkout-btn:hover:not(:disabled) {
-  background-color: #27ae60;
-}
-.checkout-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-.clear-cart-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-.clear-cart-btn:hover:not(:disabled) {
-  background-color: #c0392b;
-}
-.clear-cart-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-.checkout-error-message {
-  color: #e74c3c;
-  text-align: right;
-  margin-top: 10px;
-  font-weight: bold;
+.btn-success:hover:not(:disabled) {
+  background-color: var(--success-color-darker);
+  border-color: var(--success-color-darker);
 }
 
 
 @media (max-width: 600px) {
   .cart-item {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
   }
-  .item-image {
-    margin-right: 0;
-    margin-bottom: 15px;
+  .cart-item-image {
+    width: 80px;
+    height: 80px;
   }
-  .item-details {
+  .cart-item-subtotal {
+    text-align: left;
+    margin-top: var(--spacing-unit);
+  }
+  .cart-actions {
+    flex-direction: column;
+  }
+  .cart-actions .btn {
     width: 100%;
+    margin-bottom: var(--spacing-unit);
   }
-  .remove-item-btn {
-    margin-top: 15px;
-    width: 100%;
-  }
-  .cart-summary {
-    text-align: center;
-  }
-  .checkout-btn, .clear-cart-btn {
-    width: 100%;
-    margin: 10px 0 0 0;
+  .cart-actions .btn:last-child {
+    margin-bottom: 0;
   }
 }
 </style>

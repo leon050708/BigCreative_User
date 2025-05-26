@@ -1,210 +1,115 @@
 <template>
-  <div class="my-orders-view">
-    <h2>我的订单</h2>
-    <div v-if="orderStore.isLoading" class="loading-state">
-      <p>正在加载订单...</p>
-    </div>
-    <div v-else-if="orderStore.error" class="error-state">
-      <p>{{ orderStore.error }}</p>
-    </div>
-    <div v-else-if="orders.length === 0" class="empty-orders">
-      <p>您还没有任何订单。</p>
-      <router-link to="/" class="shop-now-btn">马上去购物</router-link>
-    </div>
-    <div v-else class="orders-list">
-      <div v-for="order in orders" :key="order.id" class="order-card">
-        <div class="order-header">
-          <h3>订单号: {{ order.id }}</h3>
-          <span :class="['order-status', order.status.toLowerCase()]">{{ getStatusText(order.status) }}</span>
-        </div>
-        <div class="order-body">
-          <p class="order-date">下单日期: {{ formatDate(order.orderDate) }}</p>
-          <p class="order-total">总金额: ¥{{ order.totalAmount.toFixed(2) }}</p>
-          <h4>订单商品:</h4>
-          <ul class="order-items-list">
-            <li v-for="item in order.items" :key="item.productId + '-' + order.id" class="order-item">
-              <img :src="item.imageUrl" :alt="item.name" class="item-thumbnail" />
-              <div class="item-info">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="item-price-qty">
-                  ¥{{ item.priceAtOrder.toFixed(2) }} x {{ item.quantity }}
-                </span>
-              </div>
-            </li>
-          </ul>
+  <div class="view-container my-orders-view">
+    <header class="view-header">
+      <h1>我的订单</h1>
+    </header>
+
+    <section class="main-view-content">
+      <div v-if="orderStore.isLoading" class="status-message-container loading-state">
+        <p>正在加载订单列表...</p>
+      </div>
+      <div v-else-if="orderStore.error" class="status-message-container error-state">
+        <p>{{ orderStore.error }}</p>
+      </div>
+      <div v-else-if="orderStore.orders.length === 0" class="status-message-container empty-state">
+        <p>您还没有订单哦。</p>
+        <router-link to="/" class="btn btn-primary mt-2">去购物</router-link>
+      </div>
+
+      <div v-else class="orders-list">
+        <div v-for="order in orderStore.orders" :key="order.id" class="order-card card">
+          <div class="order-card-header">
+            <h3>订单号: {{ order.id }}</h3>
+            <span class="order-status">{{ order.status || '已下单' }}</span> </div>
+          <div class="order-card-body">
+            <p>下单日期: {{ new Date(order.createdAt || Date.now()).toLocaleDateString() }}</p> <p>订单总额: <strong>¥{{ calculateOrderTotal(order).toFixed(2) }}</strong></p>
+            <ul class="order-items-preview" v-if="order.items && order.items.length">
+              <li v-for="item in order.items.slice(0, 2)" :key="item.productId">
+                {{ item.product ? item.product.name : `商品ID: ${item.productId}` }} x {{ item.quantity }}
+              </li>
+              <li v-if="order.items.length > 2">...等 {{ order.items.length }} 件商品</li>
+            </ul>
+          </div>
+          <div class="order-card-footer">
+            <router-link :to="`/order-detail/${order.id}`" class="btn btn-outline-primary btn-sm">查看详情</router-link>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
-import { useOrderStore } from '@/store/order';
+import { onMounted } from 'vue';
+import { useOrderStore } from '@/store/order'; //
 
 const orderStore = useOrderStore();
-const orders = computed(() => orderStore.orders);
 
 onMounted(() => {
-  // 如果订单列表为空，则获取一次
-  if (orderStore.orders.length === 0) {
-    orderStore.fetchOrders();
-  }
+  orderStore.fetchOrders(); //
 });
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
-
-const getStatusText = (status) => {
-  const statusMap = {
-    'processing': '处理中',
-    'shipped': '已发货',
-    'delivered': '已送达',
-    'cancelled': '已取消'
-  };
-  return statusMap[status.toLowerCase()] || status;
+// 辅助函数计算订单总额（如果后端没有直接返回）
+// 请根据您的实际 order 数据结构调整
+function calculateOrderTotal(order) {
+  if (order.totalAmount) return order.totalAmount; // 如果后端已提供总金额
+  if (!order.items || !Array.isArray(order.items)) return 0;
+  return order.items.reduce((sum, item) => {
+    // 假设 item 中有 price 和 quantity，或者需要从 productStore 中查找商品价格
+    // 这里的价格计算逻辑需要根据您的数据结构来定
+    // 示例：item.price * item.quantity
+    const price = item.price || (item.product ? item.product.price : 0);
+    return sum + (price * item.quantity);
+  }, 0);
 }
 </script>
 
 <style scoped>
-.my-orders-view {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
-
-.my-orders-view h2 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-}
-
-.loading-state, .error-state, .empty-orders {
-  text-align: center;
-  padding: 30px 0;
-  font-size: 1.1em;
-  color: #777;
-}
-.error-state {
-  color: #e74c3c;
-}
-.shop-now-btn {
-  display: inline-block;
-  margin-top: 15px;
-  padding: 10px 20px;
-  background-color: #3498db;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-.shop-now-btn:hover {
-  background-color: #2980b9;
-}
-
 .orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  gap: calc(var(--spacing-unit) * 2.5);
 }
-
 .order-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: calc(var(--spacing-unit) * 2);
 }
-
-.order-header {
-  padding: 15px 20px;
-  background-color: #ecf0f1;
-  border-bottom: 1px solid #e0e0e0;
+.order-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  margin-bottom: var(--spacing-unit);
+  padding-bottom: var(--spacing-unit);
+  border-bottom: 1px solid var(--border-color);
 }
-.order-header h3 {
-  margin: 0;
-  font-size: 1.2em;
-  color: #2c3e50;
+.order-card-header h3 {
+  font-size: 1.2rem;
+  color: var(--primary-color);
 }
 .order-status {
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: white;
+  background-color: var(--secondary-color);
+  color: var(--white-color);
+  padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit);
+  border-radius: var(--border-radius);
+  font-size: 0.85rem;
 }
-.order-status.processing { background-color: #3498db; } /* 蓝色 */
-.order-status.shipped { background-color: #f39c12; } /* 橙色 */
-.order-status.delivered { background-color: #2ecc71; } /* 绿色 */
-.order-status.cancelled { background-color: #e74c3c; } /* 红色 */
-
-
-.order-body {
-  padding: 15px 20px;
+.order-card-body p {
+  margin-bottom: calc(var(--spacing-unit) * 0.75);
+  color: var(--text-color-light);
 }
-.order-body p {
-  margin: 5px 0 10px;
-  color: #555;
+.order-card-body strong {
+  color: var(--text-color);
 }
-.order-date {
-  font-size: 0.9em;
-  color: #7f8c8d;
-}
-.order-total {
-  font-size: 1.1em;
-  font-weight: bold;
-  color: #333;
-}
-.order-body h4 {
-  margin-top: 15px;
-  margin-bottom: 8px;
-  font-size: 1em;
-  color: #34495e;
-}
-
-.order-items-list {
+.order-items-preview {
   list-style: none;
-  padding: 0;
+  padding-left: 0;
+  font-size: 0.9em;
+  color: var(--text-color-light);
+  margin-top: var(--spacing-unit);
 }
-.order-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px dashed #eee;
+.order-items-preview li {
+  margin-bottom: calc(var(--spacing-unit) * 0.5);
 }
-.order-item:last-child {
-  border-bottom: none;
-}
-.item-thumbnail {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-right: 10px;
-  border: 1px solid #ddd;
-}
-.item-info {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-.item-name {
-  font-size: 0.95em;
-  color: #333;
-}
-.item-price-qty {
-  font-size: 0.85em;
-  color: #777;
+.order-card-footer {
+  margin-top: calc(var(--spacing-unit) * 2);
+  text-align: right;
 }
 </style>
