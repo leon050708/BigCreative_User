@@ -48,21 +48,37 @@
 </template>
 
 <script setup>
-// ... (您的 <script setup> 内容保持不变) ...
 import { ref, onMounted, computed, watch } from 'vue';
 import { useProductStore } from '@/store/products';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'; // 引入 useRoute
 import ProductCard from '@/components/ProductCard.vue';
 import CategoryList from '@/components/CategoryList.vue';
 import SearchBar from '@/components/SearchBar.vue';
 
+const props = defineProps({
+  // searchTerm prop 仍然可以保留，如果直接通过 prop 传递搜索词（尽管通常从路由获取）
+  // 但由于我们现在主要依赖路由，可以考虑移除或使其优先级低于路由参数
+  // searchTerm: {
+  //   type: String,
+  //   default: ''
+  // }
+});
+
 const productStore = useProductStore();
 const router = useRouter();
-const route = useRoute();
+const route = useRoute(); // 使用 useRoute 来访问当前路由的 query 参数
 
+// localSearchTerm 现在主要由路由的 query.q 初始化和更新
 const localSearchTerm = ref(route.query.q || '');
 
+// 为推荐和搜索结果分别管理加载状态 (在 store 中实现会更好)
+// 为了快速演示，这里假设 store 中有 isLoadingRecommendations 和 isLoadingSearch
+// 如果没有，可以先统一用 productStore.isLoading，但体验上分开更好
+// 我们需要稍微修改 Pinia store 来支持这个，或者在这里用局部变量模拟
+// 为简化，这里我们先继续用 store 里的 isLoading 和 error, 但要确保它们被正确设置
+
 const displayedProducts = computed(() => {
+  // 这个计算属性现在只服务于搜索结果
   return productStore.searchResults;
 });
 
@@ -70,40 +86,54 @@ const currentTitle = computed(() => {
   if (localSearchTerm.value) {
     return `搜索结果: "${localSearchTerm.value}"`;
   }
-  return "商品列表";
+  // 当不显示搜索结果时，这个标题理论上用不到
+  return "商品列表"; // 或者可以返回空字符串
 });
 
 onMounted(async () => {
+  // 总是获取推荐商品
   productStore.fetchRecommendedProducts();
+
+  // 检查路由中是否已有搜索词 (例如，用户直接访问带搜索参数的URL)
   const initialSearchTerm = route.query.q;
   if (initialSearchTerm) {
     localSearchTerm.value = initialSearchTerm;
     await productStore.searchProducts(initialSearchTerm);
   } else {
+    // 如果没有初始搜索词，确保搜索结果为空
     productStore.searchResults = [];
   }
 });
 
+// 监听路由 query.q 的变化
 watch(() => route.query.q, async (newTerm) => {
   const term = newTerm || '';
   localSearchTerm.value = term;
   if (term) {
     await productStore.searchProducts(term);
   } else {
-    productStore.searchResults = [];
+    // 当搜索词清空时 (例如通过 clearSearch 或导航到首页)
+    productStore.searchResults = []; // 清空搜索结果
+    // 推荐商品应该已经在 onMounted 时获取，或者如果需要，可以在这里重新获取
+    // if (!productStore.recommendedProducts.length) {
+    //   productStore.fetchRecommendedProducts();
+    // }
   }
 });
 
 const handleSearch = (searchTerm) => {
   const trimmedSearchTerm = searchTerm.trim();
   if (trimmedSearchTerm) {
+    // 更新路由，这将触发上面的 watch
     router.push({ name: 'Home', query: { q: trimmedSearchTerm } });
   } else {
+    // 如果搜索框清空并提交，也清除路由中的q参数
     router.push({ name: 'Home', query: {} });
   }
 };
 
 const clearSearch = () => {
+  // 清除路由中的q参数，这将触发 watch
   router.push({ name: 'Home', query: {} });
 };
 </script>
@@ -112,58 +142,53 @@ const clearSearch = () => {
 .home-view {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--spacing-unit, 8px) * 4); /* 增加主要区块之间的间距 (32px) */
+  gap: 30px; /* 各个部分之间的间距 */
 }
 
 .hero-section {
-  background-color: var(--white-color, #fff);
-  padding: calc(var(--spacing-unit, 8px) * 3.5) calc(var(--spacing-unit, 8px) * 2); /* 28px 16px */
+  /* background-color: #e9ecef; */ /* 可以保留或移除，全局CSS已有背景 */
+  background-color: #fff; /* 给顶部一个白色背景，使其与推荐/搜索区区分 */
+  padding: 20px; /* 调整内边距 */
   text-align: center;
   border-radius: var(--border-radius, 8px);
-  box-shadow: var(--box-shadow, 0 2px 10px rgba(0,0,0,0.07));
-  /* border-bottom: 1px solid var(--border-color, #eee); */ /* 移除，让阴影提供区分 */
+  box-shadow: var(--box-shadow, 0 2px 8px rgba(0,0,0,0.05));
 }
-
 .hero-section h1 {
-  margin-top: 0; /* 因为 .hero-section 有 padding-top */
-  margin-bottom: calc(var(--spacing-unit, 8px) * 3); /* 24px */
-  font-size: 2.4em; /* 略微增大 */
-  color: var(--primary-color, #6b2248); /* 欢迎语使用主色 */
-  font-weight: 700; /* 加粗 */
+  margin-top: calc(var(--spacing-unit, 8px) * 2); /* 调整与搜索框的间距 */
+  margin-bottom: calc(var(--spacing-unit, 8px) * 2);
+  font-size: 2.2em; /* 调整字体大小 */
+  color: var(--dark-color, #333);
 }
-
 .home-search-bar {
-  max-width: 650px; /* 可以微调 */
-  margin: 0 auto calc(var(--spacing-unit, 8px) * 3); /* 24px */
+  max-width: 700px; /* 可以适当加宽 */
+  margin: 0 auto calc(var(--spacing-unit, 8px) * 2); /* 底部增加间距 */
 }
-/* CategoryList 会在下方单独美化 */
+/* CategoryList 默认会撑开，如果需要限制其宽度或样式，可以在 CategoryList.vue 中调整，或在这里加选择器 */
 
-.recommendations, .search-results-products {
-  background-color: var(--white-color, #fff);
-  padding: calc(var(--spacing-unit, 8px) * 3) calc(var(--spacing-unit, 8px) * 2); /* 24px 16px */
+
+.recommendations, .search-results-products { /* 改名为 search-results-products */
+  background-color: #fff;
+  padding: 20px;
   border-radius: var(--border-radius, 8px);
-  box-shadow: var(--box-shadow, 0 2px 10px rgba(0,0,0,0.07));
+  box-shadow: var(--box-shadow, 0 2px 8px rgba(0,0,0,0.05));
 }
-
 .recommendations h2, .search-results-products h2 {
   margin-top: 0;
-  color: var(--primary-color, #6b2248); /* 区块标题也使用主色 */
-  border-bottom: 2px solid var(--primary-color, #6b2248); /* 下划线也用主色 */
-  padding-bottom: calc(var(--spacing-unit, 8px) * 1.25); /* 10px */
-  margin-bottom: calc(var(--spacing-unit, 8px) * 3); /* 24px */
-  font-size: 1.8em; /* 增大标题 */
-  font-weight: 600;
-  text-align: left; /* 标题靠左，如果需要居中则 text-align: center; */
-  display: flex; /* 保持 flex 以便清除按钮能靠右 */
+  color: var(--dark-color, #34495e);
+  border-bottom: 1px solid var(--light-color, #f0f0f0); /* 细一点的下划线 */
+  padding-bottom: calc(var(--spacing-unit, 8px) * 1.5); /* 12px */
+  margin-bottom: calc(var(--spacing-unit, 8px) * 2.5); /* 20px */
+  font-size: 1.6em; /* 调整标题大小 */
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.clear-search-btn { /* 保持不变或按需微调 */
+.clear-search-btn {
   cursor: pointer;
-  font-size: 1.3em;
+  font-size: 1.3em; /* 调整大小 */
   color: #95a5a6;
-  padding: 0 calc(var(--spacing-unit, 8px));
+  padding: 0 8px; /* 调整内边距 */
   background-color: transparent;
   border: none;
 }
@@ -173,77 +198,39 @@ const clearSearch = () => {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 调整最小宽度 */
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); /* 微调最小宽度 */
   gap: calc(var(--spacing-unit, 8px) * 2.5); /* 20px */
 }
 
-/* 加载、错误、空状态样式可以保持，全局CSS中可能已有定义 */
 .loading-state, .error-state, .empty-state {
   text-align: center;
-  padding: calc(var(--spacing-unit, 8px) * 3) calc(var(--spacing-unit, 8px) * 2);
-  color: var(--text-color-light, #7f8c8d);
+  padding: calc(var(--spacing-unit, 8px) * 3) calc(var(--spacing-unit, 8px) * 2); /* 24px 16px */
+  color: #7f8c8d;
   font-size: 1.1em;
-  margin-top: calc(var(--spacing-unit, 8px) * 2);
+  /* background-color: #f8f9fa; */ /* 可选背景色 */
+  /* border-radius: var(--border-radius, 8px); */
+  /* margin-top: var(--spacing-unit, 8px) * 2; */
 }
 .error-state {
   color: var(--danger-color, #e74c3c);
+  /* background-color: color-mix(in srgb, var(--danger-color, #e74c3c) 10%, white); */
 }
 
-/* --- 响应式调整 --- */
-@media (max-width: 992px) {
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  }
-  .hero-section h1 {
-    font-size: 2em;
-  }
-  .recommendations h2, .search-results-products h2 {
-    font-size: 1.6em;
-  }
+/* main-content-area 现在只包裹搜索结果，之前的 sidebar 相关的 flex 布局不再需要 */
+.main-content-area {
+  /* 如果需要，可以添加特定于搜索结果区域的样式 */
 }
 
 @media (max-width: 768px) {
-  .home-view {
-    gap: calc(var(--spacing-unit, 8px) * 3); /* 24px */
-  }
-  .hero-section {
-    padding: calc(var(--spacing-unit, 8px) * 2.5) var(--spacing-unit, 8px); /* 20px 8px */
-  }
   .hero-section h1 {
     font-size: 1.8em;
-    margin-bottom: calc(var(--spacing-unit, 8px) * 2); /* 16px */
-  }
-  .home-search-bar {
-    margin-bottom: calc(var(--spacing-unit, 8px) * 2); /* 16px */
-  }
-  .recommendations, .search-results-products {
-    padding: calc(var(--spacing-unit, 8px) * 2); /* 16px */
   }
   .recommendations h2, .search-results-products h2 {
     font-size: 1.4em;
-    margin-bottom: calc(var(--spacing-unit, 8px) * 2); /* 16px */
   }
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: calc(var(--spacing-unit, 8px) * 1.5); /* 12px */
-  }
-}
-
-@media (max-width: 576px) {
-  .hero-section h1 {
-    font-size: 1.6em;
-  }
-  .recommendations h2, .search-results-products h2 {
-    font-size: 1.3em;
-    text-align: center; /* 小屏幕标题居中 */
-  }
-  .clear-search-btn { /* 小屏幕上可能不需要清除按钮，或做得非常小 */
-    font-size: 1.1em;
-  }
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* 卡片更小 */
-    /* 或者单列显示：grid-template-columns: 1fr; */
-    gap: var(--spacing-unit, 8px);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* 移动端更小的卡片 */
+    gap: var(--spacing-unit, 8px); /* 减小间距 */
   }
 }
 </style>

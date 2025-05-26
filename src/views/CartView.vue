@@ -93,7 +93,7 @@ const handleCheckout = async () => {
 <style scoped>
 /* ... (CartView 样式保持不变，可以添加 checkout-error-message 的样式) ... */
 .cart-view {
-  max-width: 1920px;
+  max-width: 900px;
   margin: 20px auto;
   padding: 20px;
   background-color: #fff;
