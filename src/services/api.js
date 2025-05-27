@@ -13,11 +13,10 @@ const apiClient = axios.create({
 
 export default {
     getProducts(params = {}) { // params: { categoryId, recommended, searchTerm }
-        // 后端期望的参数名可能与之前不同，这里做适配
         const queryParams = {};
         if (params.categoryId) queryParams.categoryId = params.categoryId;
-        if (params.recommended !== undefined) queryParams.recommended = params.recommended; // boolean
-        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.recommended !== undefined) queryParams.recommended = params.recommended;
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm; // searchTerm 参数名不变
 
         return apiClient.get('/products', { params: queryParams });
     },

@@ -84,6 +84,8 @@ export const useProductStore = defineStore('products', () => {
     }
 
     async function searchProducts(searchTerm) {
+        // 这个函数将 searchTerm 发送给后端
+        // 后端 API (/api/products?searchTerm=...) 应该被修改为仅在商品名称字段中搜索 searchTerm
         await fetchAndSetData(() => api.getProducts({ searchTerm: searchTerm }), searchResults, isLoadingSearch, '搜索产品失败');
     }
 

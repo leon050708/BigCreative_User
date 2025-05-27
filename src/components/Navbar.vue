@@ -22,7 +22,7 @@ const cartStore = useCartStore();
 <style scoped>
 /* ... (Navbar样式保持不变) ... */
 .navbar {
-  background-color: rgb(240, 72, 62);
+  background-color: #6b2248;
   padding: 15px 30px;
   display: flex;
   justify-content: space-between;

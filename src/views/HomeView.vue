@@ -2,14 +2,27 @@
   <div class="view-container home-view">
     <header class="view-header text-center">
       <h1>欢迎来到 BigCreative</h1>
+      <p class="page-subtitle">发现独一无二的创意产品，点亮生活每一刻。</p>
+
+      <form @submit.prevent="performSearch" class="home-search-form">
+        <input
+            type="search"
+            v-model="localSearchTerm"
+            placeholder="搜索商品名称..." class="home-search-input"
+            aria-label="搜索商品名称"
+        />
+        <button type="submit" class="btn btn-primary btn-home-search">
+          <span>🔍</span>
+        </button>
+      </form>
     </header>
 
     <section class="main-view-content">
       <div v-if="productStore.isLoadingCategories" class="status-message-container loading-state">
         <p>正在加载分类信息...</p>
       </div>
-      <div v-else-if="productStore.mainCategories.length" class="mt-2">
-        <h2>探索主要分类</h2>
+      <div v-else-if="productStore.mainCategories.length" class="home-section">
+        <h2 class="section-title"><span>探索主要分类</span></h2>
         <div class="parent-category-grid">
           <router-link
               v-for="pCategory in productStore.mainCategories"
@@ -35,12 +48,11 @@
         <p>加载分类失败: {{ productStore.error }}</p>
       </div>
 
-
       <div v-if="productStore.isLoadingRecommendations" class="status-message-container loading-state">
         <p>正在加载推荐商品...</p>
       </div>
-      <div v-else-if="productStore.recommendedProducts.length">
-        <h2>推荐商品</h2>
+      <div v-else-if="productStore.recommendedProducts.length" class="home-section">
+        <h2 class="section-title"><span>热门推荐</span></h2>
         <div class="product-grid">
           <ProductCard
               v-for="product in productStore.recommendedProducts"
@@ -57,19 +69,22 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProductStore } from '@/store/products'; //
 import ProductCard from '@/components/ProductCard.vue';
 
-const productStore = useProductStore();
+const productStore = useProductStore(); //
+const router = useRouter();
 
-// 简单的为大类提供默认图片的方法 (可以根据需要扩展)
+const localSearchTerm = ref('');
+
 const defaultParentCategoryImages = {
-  '运动器材': '/images/parent-sports-equipment.jpg',
-  '健康监测': '/images/parent-health-monitoring.jpg',
-  '食物': '/images/parent-food.jpg',
-  '运动周边': '/images/parent-sports-accessories.jpg',
-  'default': '/placeholder-parent-category-image.png' // 通用备用图片
+  '运动器材': 'https://tse4-mm.cn.bing.net/th/id/OIP-C.c9C_ShLlNu2vDjOHsPwggQHaE7?w=290&h=193&c=7&r=0&o=7&cb=iwp2&dpr=2&pid=1.7&rm=3',
+  '健康监测': 'https://tse1-mm.cn.bing.net/th/id/OIP-C._856hk6r1YoFL1u4908scQAAAA?w=228&h=180&c=7&r=0&o=7&cb=iwp2&dpr=2&pid=1.7&rm=3',
+  '食物': 'https://tse1-mm.cn.bing.net/th/id/OIP-C.-2ruSbmSOSKiBfCgNweU3wAAAA?w=193&h=193&c=7&r=0&o=7&cb=iwp2&dpr=2&pid=1.7&rm=3',
+  '运动周边': 'https://tse2-mm.cn.bing.net/th/id/OIP-C.CH9u__7OuzNFe4zjBDx-ygHaFj?w=219&h=180&c=7&r=0&o=7&cb=iwp2&dpr=2&pid=1.7&rm=3',
+  'default': '/placeholder-parent-category-image.png'
 };
 
 function defaultParentCategoryImage(mainCategoryName) {
@@ -80,64 +95,183 @@ function handleImageError(event, mainCategoryName) {
   event.target.src = defaultParentCategoryImages['default'];
 }
 
+function performSearch() {
+  if (localSearchTerm.value.trim()) {
+    router.push({ name: 'Search', query: { q: localSearchTerm.value.trim() } }); // 导航和参数 'q' 保持不变
+  }
+}
+
 onMounted(() => {
-  // 首先获取所有分类数据，这样 mainCategories 才能计算出来
   productStore.fetchCategories(); //
   productStore.fetchRecommendedProducts(); //
 });
 </script>
 
 <style scoped>
-/* 样式基本可以保持和上次讨论的一致 */
-/* .parent-category-grid, .parent-category-card, etc. */
+.view-header {
+  padding: calc(var(--spacing-unit) * 3) var(--spacing-unit); /* 增加上下内边距 */
+  /* background: linear-gradient(to bottom, var(--primary-color-light), var(--light-color)); */ /* 可选：渐变背景 */
+  /* border-bottom: 1px solid var(--border-color); */ /* 可选：底部边框 */
+}
+
+.view-header h1 {
+  font-size: 2.5rem; /* 增大主标题 */
+  color: var(--dark-color);
+  margin-bottom: calc(var(--spacing-unit) * 1);
+}
+.page-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-color-light);
+  margin-bottom: calc(var(--spacing-unit) * 3); /* 副标题与搜索框的间距 */
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 美化后的首页搜索栏 */
+.home-search-form {
+  display: flex;
+  height: 50px;
+  max-width: 890px;
+  margin: 0 auto calc(var(--spacing-unit) * 4); /* 搜索栏与下方内容的间距 */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-large); /* 更大的圆角 */
+  background-color: var(--white-color);
+  box-shadow: var(--box-shadow-light); /* 更轻的阴影 */
+  transition: box-shadow 0.2s ease-in-out;
+}
+.home-search-form:focus-within { /* 当表单内部任一元素获取焦点时 */
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 20%, transparent), var(--box-shadow);
+  border-color: color-mix(in srgb, var(--primary-color) 70%, var(--border-color));
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  padding-left: calc(var(--spacing-unit) * 1.5); /* 图标的左边距 */
+}
+
+.search-icon-prefix {
+  font-size: 1.3rem;
+  color: var(--text-color-light);
+  margin-right: calc(var(--spacing-unit) * 1);
+}
+
+.home-search-input {
+  margin: 0 0 0 20px;
+  flex-grow: 1;
+  padding: calc(var(--spacing-unit) * 1.75) calc(var(--spacing-unit) * 1.5); /* 增加输入框高度和右边距 */
+  padding-left: 0; /* 因为图标已经有左边距了 */
+  border: none;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: transparent; /* 输入框背景透明 */
+  outline: none;
+}
+.home-search-input::placeholder {
+  color: var(--text-color-light);
+  opacity: 0.8;
+}
+
+.home-search-form:focus-within { /* 当表单内部任一元素获取焦点时 */
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 20%, transparent), var(--box-shadow);
+  border-color: color-mix(in srgb, var(--primary-color) 70%, var(--border-color));
+}
+
+.btn-home-search {
+  padding: calc(var(--spacing-unit) * 1.75) calc(var(--spacing-unit) * 3);
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  border-top-right-radius: var(--border-radius-large); /* 确保圆角与表单一致 */
+  border-bottom-right-radius: var(--border-radius-large);
+  border-top-left-radius: 0; /* 按钮左侧不加圆角 */
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: 0.5px; /* 轻微增加字间距 */
+  transition: background-color 0.2s ease;
+}
+.btn-home-search:hover {
+  background-color: var(--primary-color-darker);
+}
+
+
+/* 通用区块样式 */
+.home-section {
+  margin-bottom: calc(var(--spacing-unit) * 5); /* 区块之间的垂直间距 */
+}
+.section-title {
+  font-size: 1.8rem;
+  color: var(--dark-color);
+  text-align: center;
+  margin-bottom: calc(var(--spacing-unit) * 3); /* 标题与内容的间距 */
+  position: relative; /* 用于装饰线 */
+}
+/* 标题装饰线（可选）*/
+.section-title span {
+  position: relative;
+  padding-bottom: calc(var(--spacing-unit) * 0.5);
+}
+.section-title span::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px; /* 装饰线宽度 */
+  height: 3px;  /* 装饰线厚度 */
+  background-color: var(--primary-color);
+  border-radius: 2px;
+}
+
+
+/* 大类卡片样式 (基本保持，可微调) */
 .parent-category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: calc(var(--spacing-unit) * 3);
-  margin-top: var(--spacing-unit);
-  margin-bottom: calc(var(--spacing-unit) * 3);
+  gap: calc(var(--spacing-unit) * 2.5); /* 调整卡片间距 */
+  /* margin-top: 0; */ /* section-title 已经有下边距了 */
 }
 
 @media (min-width: 768px) {
   .parent-category-grid {
-    /* 4个大类，在中大屏幕上可以设置为2x2 */
     grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (min-width: 1200px) {
   .parent-category-grid {
-    /* 或者在大屏幕上仍然是2列，但卡片更宽，或者4列并排 */
-    grid-template-columns: repeat(4, 1fr); /* 例如4列 */
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-
 .parent-category-card {
-  padding: calc(var(--spacing-unit) * 1.5);
+  padding: 0; /* 移除卡片内边距，让图片和文字自己控制 */
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */ /* 移除，让图片宽度100% */
   background-color: var(--white-color);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-large);
+  overflow: hidden; /* 确保图片圆角生效 */
 }
 
 .parent-category-card:hover {
   border-color: var(--primary-color);
-  transform: translateY(-5px);
+  transform: translateY(-6px); /* 悬浮效果更明显 */
   box-shadow: var(--box-shadow-hover);
 }
 
 .parent-category-image-wrapper {
   width: 100%;
-  padding-top: 60%; /* 例如 5:3 宽高比 */
+  padding-top: 70%; /* 调整宽高比，例如 10:7 */
   position: relative;
-  margin-bottom: calc(var(--spacing-unit) * 1.5);
-  overflow: hidden;
-  border-radius: var(--border-radius);
+  /* margin-bottom: 0; */ /* 移除，让标题部分有自己的padding */
   background-color: var(--light-color);
+  /* border-bottom: 1px solid var(--border-color); */ /* 图片和文字之间的分隔线 */
 }
 
 .parent-category-image {
@@ -147,22 +281,39 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease-in-out;
+}
+.parent-category-card:hover .parent-category-image {
+  transform: scale(1.05); /* 图片轻微放大效果 */
 }
 
 .parent-category-card h3 {
-  color: var(--primary-color);
-  font-size: 1.3rem;
-  margin-top: auto;
+  color: var(--dark-color); /* 标题颜色调整 */
+  font-size: 1.15rem; /* 调整字体大小 */
+  font-weight: 600;
   line-height: 1.4;
-  padding: var(--spacing-unit) ;
+  padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit); /* 标题的内边距 */
   width: 100%;
+  text-align: center;
+  background-color: var(--white-color); /* 确保标题背景是白色 */
+  margin-top: auto; /* 如果卡片高度不一致，标题仍然在底部 */
+}
+.parent-category-card:hover h3 {
+  color: var(--primary-color);
 }
 
-.main-view-content h2 {
-  margin-top: calc(var(--spacing-unit) * 3);
-  margin-bottom: calc(var(--spacing-unit) * 1.5);
+/* 商品网格 (推荐商品) */
+.product-grid {
+  gap: calc(var(--spacing-unit) * 2.5);
 }
-.main-view-content .mt-2 h2 { /* 确保探索分类标题与其他部分标题一致 */
-  margin-top: 0;
+
+/* 状态消息容器 (保持不变或微调) */
+.status-message-container {
+  /* ... */
+}
+
+/* 全局内容容器 */
+.main-view-content {
+  padding: 0 var(--spacing-unit); /* 移除main-view-content的上下padding，由区块自己控制 */
 }
 </style>
